@@ -126,7 +126,7 @@ VISUAL_LONG_Y <- VISUAL_YOUNG %>%
   rename(number_of_objects = set_size)
 
 
-# ===================== COMBINE PLOTS (OLDER+YOUNGER ADULTS) IN ONE FIGURE =====
+# -------------------- COMBINE PLOTS (OLDER+YOUNGER ADULTS) IN ONE FIGURE ------
 
 
 # ---- Consistent legend -------------------------------------------------------
@@ -182,7 +182,7 @@ combined_visual_plot +
   ) 
 
 
-# ===================== VISUAL COMPARISON/ SLOPE PLOT ==========================
+# --------------------- VISUAL COMPARISON/ SLOPE PLOT --------------------------
 
 
 VISUAL_COMPARISON <- read_excel("data/VISUAL_COMPARISON.xlsx") # loading file with young and old data
@@ -211,7 +211,7 @@ long_visual_ALL <- VISUAL_COMPARISON %>%
   )
 
 
-# ---- Slope plot for comparing age groups -------------------------------------
+# ---- SLOPE PLOT FOR COMPARING AGE GROUPS -------------------------------------
 
 ggplot(long_visual_ALL,
        aes(x = number_of_objects,
@@ -242,6 +242,57 @@ ggplot(long_visual_ALL,
     color = "Search Type",
     linetype = "Age Group"
   )
+
+# ----------------- VIOLIN PLOT FOR EACH AGE GROUP (jitter data) ---------------
+
+plot_data <- long_visual_ALL %>%
+  group_by(Subject, Group, search_type) %>%
+  summarise(mean_rt = mean(reaction_time,
+                           na.rm = TRUE), .groups = "drop") %>%
+  
+  mutate(Group = recode(Group, "O" = "Older Group", 
+                        "Y" = "Younger Group"))
+
+ggplot(plot_data, aes(x = search_type, 
+                      y = mean_rt, 
+                      fill = search_type)) +
+  
+  geom_violin(alpha = 0.3, color = "black") +
+  geom_jitter(aes(shape = Group), 
+              width = 0.2, 
+              size = 1.5, 
+              alpha = 0.6, 
+              show.legend = FALSE) +
+  
+  stat_summary(fun = mean,       # mean per search type of each group
+               geom = "point",
+               shape = 23,
+               fill = "red",
+               color = "black", 
+               size = 2, 
+               show.legend = FALSE) +
+  
+  stat_summary(fun.data = mean_se, 
+               geom = "errorbar",
+               width = 0.1) +
+  
+  scale_y_log10() +
+  facet_wrap(~Group) +
+  
+  scale_fill_manual(values = c("Feature" = "cyan4",
+                               "Conjunction" = "magenta")) +
+  
+  scale_shape_manual(values = c(16, 17)) +
+  guides(shape = "none") +
+  
+  labs(
+    x = "Search Type",
+    y = "Reaction Time (s) [Log Transformation]",
+    title = "Visual Search Reaction Time by Search Type and Age Group",
+    fill = "Search Type"
+  ) +
+  
+  theme_minimal(base_size = 12)
 
 
 # ===================== WACK-A-MOLE TASK =======================================
@@ -307,7 +358,7 @@ WTM_metrics <- WACK_OLD %>%
 write.csv(WTM_metrics, "wack_search_means.csv", row.names = FALSE)
 
 
-# ---- Violin plot with jittered data (RT for hits by group) -------------------
+# -------------- VIOLIN PLOT/RT FOR HITS BY GROUP (jitter data) ----------------
 
 WACK_COMPARISON <- read_excel("data/WACK_COMPARISON.xlsx") # loading file with young and old data     
 
@@ -319,7 +370,7 @@ WACK_COMPARISON$Group <- factor(WACK_COMPARISON$Group,
 ggplot(WACK_COMPARISON, aes(x = Group, y = WTM_RT_hits, fill = Group)) +
   geom_violin(alpha = 0.3) +
   geom_jitter(width = 0.15, size = 2, alpha = 0.6, color = "black") +
-  stat_summary(fun = mean,  #mean rt of hits per group 
+  stat_summary(fun = mean,             #mean rt of hits per group 
                geom = "point", 
                shape = 23,
                size = 3, 
@@ -339,7 +390,7 @@ ggplot(WACK_COMPARISON, aes(x = Group, y = WTM_RT_hits, fill = Group)) +
   theme_minimal() +
   theme(legend.position = "none")
 
-# ===================== WACK-A-MOLE ACCURACY ===================================
+# --------------------- WACK-A-MOLE ACCURACY -----------------------------------
 
 # ---- Convert hit/FA rates to long format -------------------------------------
 
@@ -357,7 +408,7 @@ rate_long$Response_Type <- recode(rate_long$Response_Type,
                                   fa_rate  = "FA")
 
 
-# ---- Accuracy boxplot with jittered data -------------------------------------
+# ---- ACCURACY BOXPLOT (jitter data) ----------------------------------------
 
 ggplot(rate_long, aes(x = Response_Type, y = Rate, fill = Group)) +
   geom_boxplot(
@@ -367,7 +418,9 @@ ggplot(rate_long, aes(x = Response_Type, y = Rate, fill = Group)) +
   ) +
   
   geom_point(
-    aes(group = Group, shape = Group, colour = Group),
+    aes(group = Group, 
+        shape = Group, 
+        colour = Group),
     position = position_jitterdodge(jitter.width = 0.95, dodge.width = 1.2),
     size = 1.5,
     alpha = 0.5,
@@ -375,7 +428,7 @@ ggplot(rate_long, aes(x = Response_Type, y = Rate, fill = Group)) +
   ) +
   
   stat_summary(aes(group = Group),
-               fun = mean,
+               fun = mean,              #mean accuracy per group
                geom = "point",
                shape = 23,
                fill = "red",
@@ -425,12 +478,14 @@ CORSI_ANOVA <- CORSI_OLD %>%
 write.csv(CORSI_ANOVA, "Corsi_anova.csv", row.names = FALSE)
 
 
-# ---- Violin plot (group comparison) ------------------------------------------
+# ---- VIOLIN SPAN PLOT/ GROUP COMPARISON (jitter data) ------------------------
 
 CORSI_COMPARISON <- read_excel("data/CORSI_COMPARISON.xlsx") #loading file with young and old data
 
 ggplot(CORSI_COMPARISON,
-       aes(x = GROUP, y = Corsi_Span, fill = GROUP)) +
+       aes(x = GROUP,
+           y = Corsi_Span, 
+           fill = GROUP)) +
   
   geom_violin(alpha = 0.3, 
               width = 0.6, 
@@ -462,7 +517,7 @@ ggplot(CORSI_COMPARISON,
   theme(legend.position = "none")
 
 
-# ---- Violin plot by age cohort -----------------------------------------------
+# ---- VIOLIN PLOT BY AGE COHORT (jitter data) ---------------------------------
 
 ggplot(CORSI_COMPARISON,
        aes(x = as.factor(Age_Group),
@@ -549,7 +604,7 @@ RT_long_F <- C_FLANKER %>%
   )
 
 
-# ---- RT violin plot with jitter ----------------------------------------------
+# ---- VIOLIN RT PLOT (jitter data) --------------------------------------------
 
 ggplot(RT_long_F, aes(x = Condition, y = RT, fill = Condition)) +
   geom_violin(alpha = 0.3, trim = FALSE) +
@@ -592,7 +647,7 @@ C_FLANKER_long <- C_FLANKER %>%
   )
 
 
-# ---- Accuracy boxplot with jitter --------------------------------------------
+# ---- ACCURACY BOXPLOT (jitter data) ------------------------------------------
 
 ggplot(C_FLANKER_long, aes(x = Condition, 
                            y = Accuracy, 
@@ -709,7 +764,7 @@ ACC_long <- C_RETRO_ANOVA %>%
                       "accuracy_RetroCue" = "Retro Cue"))
 
 
-# ---- RT violin plot ----------------------------------------------------------
+# ---- VIOLIN RT PLOT (jitter data) --------------------------------------------
 
 ggplot(RT_long_R, aes(x = Cue,
                       y = RT,
@@ -738,7 +793,7 @@ ggplot(RT_long_R, aes(x = Cue,
   theme(legend.position = "none")
 
 
-# ---- Accuracy boxplot --------------------------------------------------------
+# ---- ACCURACY BOXPLOT (jitter data) --------------------------------------------------------
 
 ggplot(ACC_long, aes(x = Cue, 
                      y = Accuracy, 
