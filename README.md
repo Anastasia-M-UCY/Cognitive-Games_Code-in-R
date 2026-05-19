@@ -8,6 +8,7 @@
 # Contents
 - Data preparation for statistical analyses in the jamovi software
    - mean values at participant level
+   - accuracy calculations
    - aggregation/ reshaping of data
    - conversions between wide and long format
     
