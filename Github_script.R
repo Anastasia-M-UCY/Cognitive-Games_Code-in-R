@@ -238,7 +238,7 @@ ggplot(long_visual_ALL,
   labs(
     x = "Number of Objects",
     y = "Reaction Time (seconds)",
-    title = "Comparison of Reaction Time Slopes Across Conditions in Visual Search Between Groups",
+    title = "Reaction Time Slopes Across Conditions in Visual Search",
     color = "Search Type",
     linetype = "Age Group"
   )
